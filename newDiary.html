@@ -56,6 +56,37 @@
       border-radius: 10px;
       margin-top: 1rem;
     }
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: #ffffff;
+      border-top: 1px solid #ccc;
+      display: flex;
+      justify-content: space-around;
+      padding: 0.5rem 0;
+      box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+      z-index: 1000;
+    }
+    /* ボタン */
+    .nav-button {
+      background: none;
+      border: none;
+      font-size: 1rem;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      color: #333;
+      font-weight: bold;
+    }
+    .nav-button:hover {
+      color: #007bff;
+    }
+
+    /* コンテンツがナビの下に隠れないよう余白追加 */
+    body, .container {
+      padding-bottom: 60px; /* ナビの高さ分を余白に */
+    }
   </style>
 </head>
 <body>
@@ -177,5 +208,10 @@
     loadCSV();
     
   </script>
+  <nav class="bottom-nav">
+    <button class="nav-button">日記投稿</button>
+    <button class="nav-button">リプライ</button>
+  </nav>
 </body>
+
 </html>
