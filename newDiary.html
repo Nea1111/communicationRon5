@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>これの名前</title>
+  <title>ココロノータ</title>
   <style>
     body {
       font-family: sans-serif;
@@ -114,7 +114,7 @@
 <body>
   <h1 style="display: flex; align-items: center; gap: 0.5rem;">
     <img src="./src/AppIcon.jpg" alt="アイコン" style="height: 40px; width: auto; border-radius: 10%;">
-    これの名前
+    ココロノータ
   </h1>
 
   <div class="top-right-settings" title="設定" onclick="showPage('settingsPage')">⚙</div>
@@ -315,6 +315,13 @@
       document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
       document.getElementById(pageId).style.display = 'block';
     }
+
+    function generateUniqueId() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2);
+    }
+    const id = generateUniqueId();
+    const diary = diaryEntries.find(d => d.id.toString() === diaryId.toString());
+
 
     async function loadCSV() {
       try {
