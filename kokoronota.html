@@ -6,7 +6,7 @@
   <style>
     body {
       font-family: sans-serif;
-      background: #f5f5f5;
+      background: #ffebee; /* より柔らかく、温かみのあるごく薄い赤系 */
       padding: 2rem;
       padding-bottom: 60px;
       position: relative;
@@ -14,32 +14,57 @@
     .container {
       max-width: 800px;
       margin: auto;
-      background: white;
-      padding: 2rem;
+      background: #fff;
+      padding: 2.5rem;
       border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       padding-bottom: 60px;
       position: relative;
     }
-    textarea, input, button, select {
+    h1 {
+      color: #c2185b; /* 濃いローズピンクに変更 */
+    }
+    textarea, input, select {
       width: 100%;
       margin-top: 0.5rem;
-      margin-bottom: 1rem;
-      padding: 0.8rem;
+      margin-bottom: 1.2rem;
+      padding: 1rem;
       border-radius: 8px;
-      border: 1px solid #ccc;
+      border: 1px solid #f8bbd0; /* 明るいピンク系のボーダー */
       font-size: 1rem;
       box-sizing: border-box;
     }
+    button {
+      background-color: #e91e63; /* ピンクに変更 */
+      color: white;
+      padding: 1rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #d81b60; /* ホバー時の濃いピンク */
+    }
     .diary-entry {
       position: relative;
-      background: #eef;
-      padding: 1rem;
+      background: #fce4ec; /* ごく薄いピンクに変更 */
+      color: #4e342e; /* 濃いブラウン系のテキストに修正 */
+      padding: 1.2rem;
       border-radius: 10px;
-      margin-bottom: 1rem;
+      margin-bottom: 1.2rem;
       width: fit-content;
       max-width: 90%;
       margin-left: 15px;
+      cursor: pointer; /* クリック可能であることを示す */
+    }
+    .diary-entry:hover {
+      background: #f8bbd0; /* ホバー時の色を少し濃いピンクに */
+    }
+    /* 日記エントリのホバー時に、吹き出しの矢印の色も連動して変わるように */
+    .diary-entry:hover::before {
+        border-right: 15px solid #f8bbd0; /* ホバー時の色と連動 */
     }
     .diary-entry::before {
       content: '';
@@ -47,36 +72,82 @@
       bottom: 8px;
       left: -15px;
       border: 8px solid transparent;
-      border-right: 15px solid #eef;
+      border-right: 15px solid #fce4ec; /* 背景色と合わせる */
+      transition: border-right 0.2s ease; /* スムーズな遷移 */
     }
     .word-suggestions {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 1rem;
+      gap: 0.6rem;
+      margin-bottom: 1.2rem;
     }
     .word {
-      background: #def;
-      padding: 0.5rem 1rem;
+      background: #f48fb1; /* 明るいピンクに変更 */
+      color: white; /* テキストを白に */
+      padding: 0.6rem 1.2rem;
       border-radius: 20px;
       cursor: pointer;
       user-select: none;
+      transition: background-color 0.2s ease;
     }
     .word:hover {
-      background: #cde;
+      background: #ec407a; /* ホバー時の濃いピンク */
     }
-    .selected-words {
+
+    /* selected-wordsのスタイル */
+    .selected-words-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
       margin-bottom: 1rem;
+      min-height: 2.5rem; /* 高さを持たせて、単語がない時でも崩れないように */
+      border: 1px dashed #f8bbd0; /* 明るいピンク系の点線ボーダー */
+      padding: 0.5rem;
+      border-radius: 8px;
+      align-items: center; /* 縦方向の中央揃え */
     }
+    .selected-word-tag {
+      background: #ffcdd2; /* 選んだ単語の背景色を明るいピンクに */
+      color: #b71c1c; /* 濃い赤のテキストに修正 */
+      padding: 0.4rem 0.8rem;
+      padding-right: 0.5rem; /* Xボタンのために少しスペースを確保 */
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      white-space: nowrap; /* 単語が改行されないように */
+    }
+    .selected-word-tag .close-btn {
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: bold;
+      color: #e53935; /* 赤色のX */
+      margin-left: 0.2rem;
+    }
+    .selected-word-tag .close-btn:hover {
+      color: #b71c1c; /* ホバー時に濃い赤 */
+    }
+    /* 「選んだ褒め言葉: 」というテキストのスタイル */
+    .selected-words-label {
+      color: #4e342e; /* 濃いブラウン系のテキストに修正 */
+      margin-right: 0.5rem;
+      font-weight: bold;
+    }
+
+
     .reply {
       position: relative;
-      background: #efe;
-      padding: 1rem;
+      background: #ffcdd2; /* リプライの色を明るいピンクに修正 */
+      color: #880e4f; /* 濃いローズピンクのテキストに修正 */
+      padding: 1.2rem;
       border-radius: 10px;
       width: fit-content;
       max-width: 90%;
       margin-left: auto; /* 右寄せ */
       margin-right: 15px;
+      /* リプライ吹き出しにはホバーエフェクトを適用しない */
+      transition: none;
+      cursor: default;
     }
     .reply::before {
       content: '';
@@ -84,7 +155,9 @@
       bottom: 8px;
       right: -15px;
       border: 8px solid transparent;
-      border-left: 15px solid #efe;
+      border-left: 15px solid #ffcdd2; /* 背景色と合わせる */
+      /* リプライ吹き出しの矢印にもホバーエフェクトを適用しない */
+      transition: none;
     }
     .top-right-settings {
       position: fixed;
@@ -93,95 +166,220 @@
       cursor: pointer;
       font-size: 24px;
       user-select: none;
-      color: #333;
+      color: #880e4f; /* 濃いローズピンク */
       z-index: 1100;
-      background: white;
+      background: #f8bbd0; /* 明るいピンクの背景 */
       border-radius: 50%;
       width: 40px;
       height: 40px;
       display: flex;
       justify-content: center;
       align-items: center;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-      transition: color 0.2s ease;
+      box-shadow: 0 3px 7px rgba(0,0,0,0.15);
+      transition: color 0.2s ease, background-color 0.2s ease;
     }
     .top-right-settings:hover {
-      color: #007bff;
+      color: #e91e63;
+      background-color: #f48fb1;
     }
     .bottom-nav {
       position: fixed;
       bottom: 0;
       left: 0;
       width: 100%;
-      background-color: #ffffff;
-      border-top: 1px solid #ccc;
+      background-color: #fff;
+      border-top: 1px solid #f8bbd0; /* 明るいピンク系のボーダー */
       display: flex;
       justify-content: space-around;
-      padding: 0.5rem 0;
-      box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+      padding: 0.7rem 0;
+      box-shadow: 0 -3px 7px rgba(0,0,0,0.1);
       z-index: 1000;
     }
     .nav-button {
       background: none;
       border: none;
       font-size: 1rem;
-      padding: 0.5rem 1rem;
+      padding: 0.7rem 1.2rem;
       cursor: pointer;
-      color: #333;
+      color: #880e4f;
       font-weight: bold;
+      transition: color 0.2s ease;
+      position: relative; /* ツールチップのために必要 */
     }
     .nav-button:hover {
-      color: #007bff;
+      color: #e91e63;
+    }
+
+    /* ツールチップスタイル */
+    .nav-button .tooltiptext {
+      visibility: hidden;
+      width: 100px;
+      background-color: #555;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 5px 0;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%; /* ボタンの上 */
+      left: 50%;
+      margin-left: -50px; /* 半分ずらして中央に */
+      opacity: 0;
+      transition: opacity 0.3s;
+      font-size: 0.8rem;
+      font-weight: normal;
+      white-space: nowrap; /* テキストが改行されないように */
+    }
+
+    .nav-button .tooltiptext::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-left: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: #555 transparent transparent transparent;
+    }
+
+    .nav-button:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
     }
 
     .diary-list-item {
-        display: flex;
-        flex-direction: column;
-        margin-bottom: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 1.8rem;
     }
     .diary-and-button-wrapper {
-        display: flex;
-        align-items: flex-end;
-        gap: 0.5rem;
-        width: 100%;
+      display: flex;
+      align-items: flex-end;
+      gap: 0.7rem;
+      width: 100%;
     }
     .diary-and-button-wrapper > .diary-entry {
-        margin-bottom: 0;
+      margin-bottom: 0;
     }
     .replies-container {
-        margin-top: 1rem;
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
+      margin-top: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      /* リプライが最初から表示されるようにスタイル調整 */
+      display: flex !important;
     }
-    
+
     .reply-button {
-        background: none;
-        border: none;
-        padding: 0.25rem;
-        cursor: pointer;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 40px;
-        height: 40px;
-        transition: background-color 0.2s;
-        margin-bottom: 0;
-        flex-shrink: 0;
+      background: #fbe9e7; /* ごく薄い赤系の背景 */
+      border: none;
+      padding: 0.5rem;
+      cursor: pointer;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 40px;
+      height: 40px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transition: background-color 0.2s, box-shadow 0.2s;
+      margin-bottom: 0;
+      flex-shrink: 0;
     }
     .reply-button:hover {
-        background-color: #e0e0e0;
+      background-color: #ffcdd2; /* ホバー時の少し濃い赤系 */
+      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
     }
-    
-    /* --- ▼ここから修正▼ --- */
-    .reply-button img {
-        width: 22px;
-        height: 22px;
-        display: block;
-    }
-    /* --- ▲ここまで修正▲ --- */
 
+    .reply-button img {
+      width: 24px;
+      height: 24px;
+      display: block;
+      /* アイコンに赤系・ピンク系の色味を適用 */
+      filter: sepia(50%) hue-rotate(330deg) saturate(150%) brightness(90%);
+      transition: filter 0.2s ease;
+    }
+    .reply-button:hover img {
+      filter: sepia(0%) hue-rotate(0deg) saturate(100%);
+    }
+
+    /* Modal styles */
+    .modal {
+      display: none; /* Hidden by default */
+      position: fixed; /* Stay in place */
+      z-index: 2000; /* Sit on top */
+      left: 0;
+      top: 0;
+      width: 100%; /* Full width */
+      height: 100%; /* Full height */
+      overflow: auto; /* Enable scroll if needed */
+      background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background-color: #fff;
+      margin: auto;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      width: 90%;
+      max-width: 600px;
+      position: relative;
+      animation-name: animatetop;
+      animation-duration: 0.4s;
+    }
+    @keyframes animatetop {
+      from {top: -300px; opacity: 0}
+      to {top: 0; opacity: 1}
+    }
+    .close-modal {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+    .close-modal:hover,
+    .close-modal:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .modal-buttons-right {
+        display: flex;
+        justify-content: flex-end; /* 右寄せに変更 */
+        gap: 10px;
+        margin-top: 1rem;
+    }
+    .modal-buttons-right button {
+        width: auto; /* ボタン幅を自動調整 */
+        padding: 0.8rem 1.5rem;
+        font-size: 0.9rem;
+        /* 色を控えめに調整 */
+        background-color: #ffcdd2; /* 明るいピンク */
+        color: #b71c1c; /* 濃い赤 */
+    }
+    .modal-buttons-right button:hover {
+        background-color: #f8bbd0; /* ホバー時に少し濃く */
+    }
+    .modal-buttons-right button.submit-reply-button {
+        background-color: #e91e63; /* 送信ボタンの色を強調（元のピンク） */
+        color: #fff;
+    }
+    .modal-buttons-right button.submit-reply-button:hover {
+        background-color: #d81b60; /* ホバー時に濃いピンク */
+    }
+
+    /* 日記本文の表示を調整 */
+    .diary-detail-text {
+        background: #fce4ec; /* 日記エントリの背景色と合わせる */
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        color: #4e342e; /* テキスト色を日記エントリのテキスト色と合わせる */
+        font-size: 1.1rem;
+        line-height: 1.6;
+    }
   </style>
 </head>
 <body>
@@ -207,50 +405,64 @@
     <div class="container">
       <h2>他の人の日記</h2>
       <div id="diaryListForReply"></div>
+      
+      <div id="replyModal" class="modal">
+        <div class="modal-content">
+          <span class="close-modal" onclick="closeReplyModal()">&times;</span>
+          <h2>リプライを作成</h2>
+          <p style="color: #4e342e;"><strong>リプライする日記：</strong></p>
+          <div id="modalDiaryText" class="diary-detail-text"></div>
 
-      <div id="replyInputArea" style="display:none; margin-top: 1rem;">
-        <p><strong>リプライする日記：</strong><span id="selectedDiaryText"></span></p>
-        <label for="categorySelect">分類を選択: </label>
-        <select id="categorySelect" onchange="shuffleWords()">
-          <option value="すごい">すごい</option>
-          <option value="うれしい">うれしい</option>
-          <option value="ほっこり">ほっこり</option>
-          <option value="感動">感動</option>
-          <option value="面白い">面白い</option>
-          <option value="独創的">独創的</option>
-          <option value="かわいい">かわいい</option>
-          <option value="風景描写">風景描写</option>
-          <option value="共感">共感</option>
-          <option value="見た目">見た目</option>
-          <option value="流行">流行</option>
-          <option value="オノマトペ">オノマトペ</option>
-        </select>
-        <br /><br />
-        <div class="word-suggestions" id="wordSuggestions"></div>
-        <button onclick="shuffleWords()">シャッフル</button>
+          <label for="categorySelectModal" style="color: #4e342e;">分類を選択: </label>
+          <select id="categorySelectModal" onchange="shuffleWordsModal()">
+            <option value="すごい">すごい</option>
+            <option value="うれしい">うれしい</option>
+            <option value="ほっこり">ほっこり</option>
+            <option value="感動">感動</option>
+            <option value="面白い">面白い</option>
+            <option value="独創的">独創的</option>
+            <option value="かわいい">かわいい</option>
+            <option value="風景描写">風景描写</option>
+            <option value="共感">共感</option>
+            <option value="見た目">見た目</option>
+            <option value="流行">流行</option>
+            <option value="オノマトペ">オノマトペ</option>
+          </select>
+          <br /><br />
+          <div class="word-suggestions" id="wordSuggestionsModal"></div>
+          
+          <div class="modal-buttons-right">
+              <button onclick="shuffleWordsModal()">シャッフル</button>
+          </div>
 
-        <div class="selected-words" id="selectedWords">選んだ褒め言葉: </div>
-        <button onclick="submitReply()">リプライ送信</button>
-
-        <div id="replyDisplay" class="reply"></div>
+          <div class="selected-words-container" id="selectedWordsContainerModal">
+            <span class="selected-words-label">選んだ褒め言葉:</span>
+          </div>
+          <div class="modal-buttons-right">
+              <button class="submit-reply-button" onclick="submitReply()">リプライ送信</button>
+          </div>
+        </div>
       </div>
+
     </div>
   </div>
 
   <div id="settingsPage" class="page" style="display:none;">
     <div class="container">
       <h2>設定</h2>
-      <p>保存されたデータをリセットします。</p>
+      <p style="color: #4e342e;">保存されたデータをリセットします。</p>
       <button onclick="clearAllData()">すべての投稿とリプライを削除</button>
     </div>
   </div>
 
   <nav class="bottom-nav">
-    <button class="nav-button" onclick="showPage('diaryPage')">
-        <img src="./src/diary.png" alt="アイコン" style="height: 40px; width: auto; border-radius: 10%;">
-        </button>
-    <button class="nav-button" onclick="showPage('replyPage')">
-        <img src="./src/reply.png" alt="アイコン" style="height: 40px; width: auto; border-radius: 10%;">
+    <button class="nav-button" onclick="showPage('diaryPage')" title="日記を投稿する">
+        <img src="./src/diary.png" alt="アイコン" style="height: 36px; width: auto; border-radius: 10%; filter: sepia(50%) hue-rotate(330deg) saturate(150%);">
+        <span class="tooltiptext">日記投稿</span>
+    </button>
+    <button class="nav-button" onclick="showPage('replyPage')" title="他の人の日記を見る">
+        <img src="./src/reply.png" alt="アイコン" style="height: 36px; width: auto; border-radius: 10%; filter: sepia(50%) hue-rotate(330deg) saturate(150%);">
+        <span class="tooltiptext">日記一覧</span>
     </button>
   </nav>
 
@@ -260,6 +472,13 @@
     let replyEntries = {};
     let selectedWords = [];
     let currentReplyDiaryId = null;
+
+    // モーダル要素
+    const replyModal = document.getElementById('replyModal');
+    const modalDiaryText = document.getElementById('modalDiaryText');
+    const categorySelectModal = document.getElementById('categorySelectModal');
+    const wordSuggestionsModal = document.getElementById('wordSuggestionsModal');
+    const selectedWordsContainerModal = document.getElementById('selectedWordsContainerModal');
 
     function submitDiary() {
       const diaryText = document.getElementById("diaryInput").value.trim();
@@ -286,26 +505,25 @@
     function updateDiaryDisplay() {
       const display = document.getElementById("diaryDisplay");
       display.innerHTML = diaryEntries.map(entry =>
-        `<div class="diary-entry">
+        `<div class="diary-entry" onclick="viewDiaryAndRepliesOnReplyPage(${entry.id})">
           <strong>${entry.timestamp}</strong><br>${entry.text.replace(/\n/g, '<br>')}
         </div>`
       ).join("");
     }
 
-    // --- ▼ここから修正▼ ---
     function updateDiaryListForReply() {
       const container = document.getElementById("diaryListForReply");
       if (diaryEntries.length === 0) {
-        container.innerHTML = "<p>まだ日記がありません。</p>";
+        container.innerHTML = "<p style='color: #880e4f;'>まだ日記がありません。</p>";
         return;
       }
       container.innerHTML = diaryEntries.map(entry => `
-        <div class="diary-list-item">
+        <div class="diary-list-item" id="diaryListItem_${entry.id}">
           <div class="diary-and-button-wrapper">
             <div class="diary-entry">
               <strong>${entry.timestamp}</strong><br>${entry.text.replace(/\n/g, '<br>')}
             </div>
-            <button class="reply-button" onclick="selectDiaryForReply(${entry.id})" title="この投稿にリプライ">
+            <button class="reply-button" onclick="openReplyModal(${entry.id})" title="この投稿にリプライ">
               <img src="./src/reply-icon.png" alt="この投稿にリプライ">
             </button>
           </div>
@@ -315,7 +533,6 @@
         </div>
       `).join("");
     }
-    // --- ▲ここまで修正▲ ---
 
     function renderReplies(diaryId) {
       const replies = replyEntries[diaryId] || [];
@@ -327,27 +544,43 @@
       `).join("");
     }
 
-    function selectDiaryForReply(diaryId) {
-      currentReplyDiaryId = diaryId;
-      selectedWords = [];
-      updateSelectedWords();
-
-      const diary = diaryEntries.find(d => d.id === diaryId);
-      document.getElementById("selectedDiaryText").innerText = diary ? diary.text : "";
-      document.getElementById("replyInputArea").style.display = "block";
-
-      shuffleWords();
-      document.getElementById("replyInputArea").scrollIntoView({ behavior: 'smooth' });
+    // 日記投稿画面からリプライ画面へ遷移し、該当日記にスクロールする関数
+    function viewDiaryAndRepliesOnReplyPage(diaryId) {
+        showPage('replyPage');
+        setTimeout(() => {
+            const targetDiary = document.getElementById(`diaryListItem_${diaryId}`);
+            if (targetDiary) {
+                targetDiary.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 100); // ページ遷移のレンダリングを待つための短い遅延
     }
 
-    function shuffleWords() {
-      const category = document.getElementById("categorySelect").value;
+    function openReplyModal(diaryId) {
+      currentReplyDiaryId = diaryId;
+      selectedWords = []; // 新しい日記を選択したときのみ、選択中の単語をクリア
+      updateSelectedWordsModal(); // モーダルの選択済み単語表示を更新
+
+      const diary = diaryEntries.find(d => d.id === diaryId);
+      modalDiaryText.innerHTML = diary ? `<strong>${diary.timestamp}</strong><br>${diary.text.replace(/\n/g, '<br>')}` : "";
+      
+      shuffleWordsModal(); // モーダルの褒め言葉候補をシャッフル
+      replyModal.style.display = "flex"; // モーダルを表示
+    }
+
+    function closeReplyModal() {
+      replyModal.style.display = "none"; // モーダルを非表示
+      // 必要であれば、モーダルの状態をリセット
+      selectedWords = [];
+      updateSelectedWordsModal();
+    }
+
+    function shuffleWordsModal() {
+      const category = categorySelectModal.value;
       const words = wordDict[category] || [];
       const availableWords = words.filter(word => !selectedWords.includes(word));
       
       const shuffled = [...availableWords].sort(() => 0.5 - Math.random()).slice(0, 5);
-      const suggestionBox = document.getElementById("wordSuggestions");
-      suggestionBox.innerHTML = "";
+      wordSuggestionsModal.innerHTML = "";
 
       shuffled.forEach(word => {
         const wordBtn = document.createElement("div");
@@ -356,16 +589,34 @@
         wordBtn.onclick = () => {
           if (!selectedWords.includes(word)) {
             selectedWords.push(word);
-            updateSelectedWords();
+            updateSelectedWordsModal();
           }
         };
-        suggestionBox.appendChild(wordBtn);
+        wordSuggestionsModal.appendChild(wordBtn);
       });
     }
 
-    function updateSelectedWords() {
-      const display = document.getElementById("selectedWords");
-      display.innerText = "選んだ褒め言葉: " + (selectedWords.length > 0 ? selectedWords.join("、") : "");
+    function updateSelectedWordsModal() {
+      const container = selectedWordsContainerModal;
+      container.innerHTML = `<span class="selected-words-label">選んだ褒め言葉:</span>`;
+
+      if (selectedWords.length > 0) {
+        selectedWords.forEach((word, index) => {
+          const tag = document.createElement('span');
+          tag.className = 'selected-word-tag';
+          tag.innerHTML = `${word} <span class="close-btn" data-index="${index}">&times;</span>`;
+          container.appendChild(tag);
+        });
+
+        container.querySelectorAll('.close-btn').forEach(btn => {
+          btn.onclick = (event) => {
+            const indexToRemove = parseInt(event.target.dataset.index);
+            selectedWords.splice(indexToRemove, 1);
+            updateSelectedWordsModal();
+            shuffleWordsModal(); // 削除した単語がサジェストに出てくるようにシャッフル
+          };
+        });
+      }
     }
 
     function submitReply() {
@@ -386,10 +637,10 @@
       localStorage.setItem("replyEntries", JSON.stringify(replyEntries));
 
       selectedWords = [];
-      updateSelectedWords();
-      document.getElementById("replyInputArea").style.display = "none";
+      updateSelectedWordsModal(); // モーダルの表示をリセット
+      closeReplyModal(); // モーダルを閉じる
 
-      updateDiaryListForReply();
+      updateDiaryListForReply(); // リプライを反映させるために更新
       alert("リプライを送信しました");
     }
 
@@ -408,7 +659,8 @@
           if (!wordDict[category]) wordDict[category] = [];
           wordDict[category].push(word);
         });
-        shuffleWords();
+        // 初期化時にモーダル用のシャッフルもしておく
+        shuffleWordsModal();
       } catch (e) {
         console.error("CSV読み込みエラー:", e);
       }
@@ -452,6 +704,7 @@
       updateDiaryListForReply();
 
       alert("データを削除しました");
+      showPage('diaryPage'); // 履歴削除後に日記投稿画面へ遷移
     }
 
     window.onload = () => {
