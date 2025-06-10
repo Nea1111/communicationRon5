@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
+  <link rel="icon" href="./src/AppIcon.ico">
   <title>ココロノータ</title>
   <style>
     body {
@@ -369,6 +370,31 @@
     .modal-buttons-right button.submit-reply-button:hover {
         background-color: #d81b60; /* ホバー時に濃いピンク */
     }
+    /* 吹き出し内のタイムスタンプを右下に固定するためのクラスを追加 */
+.diary-entry {
+  position: relative;
+  background: #fce4ec;
+  color: #4e342e;
+  padding: 1.2rem;
+  border-radius: 10px;
+  margin-bottom: 1.2rem;
+  width: fit-content;
+  max-width: 90%;
+  margin-left: 15px;
+  cursor: pointer;
+  min-width: 180px; /* ←追加: 吹き出しが小さすぎる場合のため */
+}
+.diary-timestamp {
+  position: absolute;
+  right: 14px;
+  bottom: 10px;
+  font-size: 0.85rem;
+  color: #b71c1c;
+  opacity: 0.7;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+}
 
     /* 日記本文の表示を調整 */
     .diary-detail-text {
@@ -383,11 +409,12 @@
   </style>
 </head>
 <body>
-  <h1 style="font-size: 40px; display: flex; align-items: center; gap: 0.5rem;">
-    <img src="./src/AppIcon.png" alt="アイコン" style="height: 70px; width: auto; border-radius: 10%;">
-    ココロノータ
-  </h1>
-
+  <div style="max-width: 800px; margin: 0 auto;">
+    <h1 style="font-size: 40px; display: flex; align-items: center; gap: 0.5rem;">
+      <img src="./src/AppIcon.png" alt="アイコン" style="height: 70px; width: auto; border-radius: 10%;">
+      ココロノータ
+    </h1>
+  </div>
   <div class="top-right-settings" title="設定" onclick="showPage('settingsPage')">⚙</div>
 
   <div id="diaryPage" class="page">
@@ -395,7 +422,7 @@
       <h2>今日の日記</h2>
       <textarea id="diaryInput" rows="4" placeholder="今日あったことを書いてください..."></textarea>
       <button onclick="submitDiary()">投稿</button>
-
+      <hr style="margin: 2rem 0; border: none; border-top: 1.5px solid #f8bbd0;">
       <h3>投稿された日記</h3>
       <div id="diaryDisplay"></div>
     </div>
@@ -404,6 +431,7 @@
   <div id="replyPage" class="page" style="display:none;">
     <div class="container">
       <h2>他の人の日記</h2>
+      <hr style="margin: 2rem 0; border: none; border-top: 1.5px solid #f8bbd0;">
       <div id="diaryListForReply"></div>
       
       <div id="replyModal" class="modal">
@@ -448,12 +476,30 @@
   </div>
 
   <div id="settingsPage" class="page" style="display:none;">
-    <div class="container">
-      <h2>設定</h2>
-      
-      <p style="color: #4e342e;">保存されたデータをリセットします。</p>
-      <button onclick="clearAllData()">すべての投稿とリプライを削除</button>
-    </div>
+<div class="container">
+  <h2>設定</h2>
+  <hr style="margin: 2rem 0; border: none; border-top: 1.5px solid #f8bbd0;">
+  <h3>プロフィール</h3>
+  <p style="color: #4e342e;">あなたのニックネームやアイコンを設定できます。</p>
+
+  <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+    <label for="profileIcon">アイコン:</label>
+    <img id="profilePreview" src="./src/profileIcon.png" style="width: 10%; height: auto; border-radius: 10%; cursor: pointer;">
+    <input type="file" id="profileIcon" accept="image/*" style="display: none;">
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+    <label for="profileName">ニックネーム:</label>
+    <input type="text" id="profileName" placeholder="名無し" style="width: 10%; height: auto; min-width: 200px;">
+  </div>
+
+  <button onclick="alert('プロフィールが変更されました！')">保存</button>
+<hr style="margin: 2rem 0; border: none; border-top: 1.5px solid #f8bbd0;">
+<h3>データの削除</h3>
+  <p style="color: #4e342e;">保存されたデータをリセットします。</p>
+  <button onclick="clearAllData()">すべての投稿とリプライを削除</button>
+</div>
+
   </div>
 
   <nav class="bottom-nav">
@@ -481,6 +527,26 @@
     const wordSuggestionsModal = document.getElementById('wordSuggestionsModal');
     const selectedWordsContainerModal = document.getElementById('selectedWordsContainerModal');
 
+    const profilePreview = document.getElementById("profilePreview");
+  const profileIconInput = document.getElementById("profileIcon");
+
+  // 画像クリックでファイル選択ダイアログを開く
+  profilePreview.addEventListener("click", () => {
+    profileIconInput.click();
+  });
+
+  // 選んだ画像をプレビューに反映
+  profileIconInput.addEventListener("change", function () {
+    const file = this.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        profilePreview.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+  
     function submitDiary() {
       const diaryText = document.getElementById("diaryInput").value.trim();
       if (diaryText === "") {
@@ -493,7 +559,9 @@
         hour: "2-digit", minute: "2-digit", second: "2-digit"
       });
       const id = Date.now();
-      const entry = { id, text: diaryText, timestamp: dateStr };
+      const profileName = localStorage.getItem('profileName') || '名無し';
+const profileIcon = localStorage.getItem('profileIcon') || './src/profileIcon.png';
+const entry = { id, text: diaryText, timestamp: dateStr, profileName, profileIcon };
 
       diaryEntries.push(entry);
       localStorage.setItem("diaryEntries", JSON.stringify(diaryEntries));
@@ -519,30 +587,43 @@
         return;
       }
       container.innerHTML = diaryEntries.map(entry => `
-        <div class="diary-list-item" id="diaryListItem_${entry.id}">
-          <div class="diary-and-button-wrapper">
-            <div class="diary-entry">
-              <strong>${entry.timestamp}</strong><br>${entry.text.replace(/\n/g, '<br>')}
-            </div>
-            <button class="reply-button" onclick="openReplyModal(${entry.id})" title="この投稿にリプライ">
-              <img src="./src/reply-icon.png" alt="この投稿にリプライ">
-            </button>
-          </div>
-          <div class="replies-container">
-            ${renderReplies(entry.id)}
-          </div>
+  <div class="diary-list-item" id="diaryListItem_${entry.id}">
+    <div class="diary-and-button-wrapper">
+      <div style="display: flex; flex-direction: column; align-items: center; margin-right: 0.8rem;">
+        <img src="${entry.profileIcon}" alt="アイコン" style="width: 48px; height: 48px; border-radius: 10%; object-fit: cover;">
+        <span style="font-size: 0.9rem; color: #880e4f; margin-top: 0.3rem;">${entry.profileName}</span>
+      </div>
+      <div style="display: flex; flex-direction: column;">
+        <div class="diary-entry">
+          <div>${entry.text.replace(/\n/g, '<br>')}</div>
         </div>
-      `).join("");
+        <div class="diary-timestamp" style="position: static; margin-top: 0; align-self: flex-end;">
+          ${entry.timestamp}
+        </div>
+      </div>
+      <button class="reply-button" onclick="openReplyModal(${entry.id})" title="この投稿にリプライ">
+        <img src="./src/reply-icon.png" alt="この投稿にリプライ">
+      </button>
+    </div>
+    <div class="replies-container">
+      ${renderReplies(entry.id)}
+    </div>
+  </div>
+`).join("");
     }
 
     function renderReplies(diaryId) {
       const replies = replyEntries[diaryId] || [];
       if (replies.length === 0) return "";
-      return replies.map(replyText => `
-        <div class="reply">
-          ${replyText}
-        </div>
-      `).join("");
+      return replies.map(reply =>
+  `<div class="reply">
+    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.3rem;">
+      <img src="${reply.profileIcon}" alt="アイコン" style="width:28px; height:28px; border-radius:10%; object-fit:cover;">
+      <span style="font-size:0.9rem; color:#880e4f;">${reply.profileName}</span>
+    </div>
+    ${reply.text}
+  </div>`
+).join("");
     }
 
     // 日記投稿画面からリプライ画面へ遷移し、該当日記にスクロールする関数
@@ -630,12 +711,15 @@
         return;
       }
 
-      const replyText = selectedWords.join("、") + "！";
-      if (!replyEntries[currentReplyDiaryId]) {
-        replyEntries[currentReplyDiaryId] = [];
-      }
-      replyEntries[currentReplyDiaryId].push(replyText);
-      localStorage.setItem("replyEntries", JSON.stringify(replyEntries));
+      const replyProfileName = localStorage.getItem('profileName') || '名無し';
+const replyProfileIcon = localStorage.getItem('profileIcon') || './src/profileIcon.png';
+const replyText = selectedWords.join("、") + "！";
+const replyObj = { text: replyText, profileName: replyProfileName, profileIcon: replyProfileIcon };
+if (!replyEntries[currentReplyDiaryId]) {
+  replyEntries[currentReplyDiaryId] = [];
+}
+replyEntries[currentReplyDiaryId].push(replyObj);
+localStorage.setItem("replyEntries", JSON.stringify(replyEntries));
 
       selectedWords = [];
       updateSelectedWordsModal(); // モーダルの表示をリセット
@@ -679,39 +763,39 @@
           diaryEntries = [];
         }
       }
-
-      if (replies) {
-        try {
+ catch (e) {
+      if (replies) {   console.error("リプライの読み込み失敗:", e);
+        try {;
           replyEntries = JSON.parse(replies);
-        } catch (e) {
-          console.error("リプライの読み込み失敗:", e);
-          replyEntries = {};
-        }
-      }
-      updateDiaryDisplay();
+        } }
+      }      updateDiaryDisplay();
+      updateDiaryDisplay();();
       updateDiaryListForReply();
     }
 
-    function clearAllData() {
+    function clearAllData() {)) return;
       if (!confirm("すべての投稿とリプライを削除してもよろしいですか？")) return;
-
-      localStorage.removeItem("diaryEntries");
+eItem("diaryEntries");
+      localStorage.removeItem("diaryEntries");eItem("replyEntries");
       localStorage.removeItem("replyEntries");
 
       diaryEntries = [];
       replyEntries = {};
-
+;
       updateDiaryDisplay();
       updateDiaryListForReply();
-
       alert("データを削除しました");
+      alert("データを削除しました");; // 履歴削除後に日記投稿画面へ遷移
       showPage('diaryPage'); // 履歴削除後に日記投稿画面へ遷移
     }
-
-    window.onload = () => {
-        loadSavedData();
+ndow.onload = () => {
+    window.onload = () => {dSavedData();
+        loadSavedData(); loadCSV();
         loadCSV();
-    };
-  </script>
+
+
+
+
+</html></body>  </script>    };  </script>
 </body>
 </html>
