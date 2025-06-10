@@ -8,7 +8,8 @@
       font-family: sans-serif;
       background: #f5f5f5;
       padding: 2rem;
-      padding-bottom: 60px; /* ナビの高さ分を余白に */
+      padding-bottom: 60px;
+      position: relative;
     }
     .container {
       max-width: 800px;
@@ -17,9 +18,10 @@
       padding: 2rem;
       border-radius: 12px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      padding-bottom: 60px; /* ナビの高さ分を余白に */
+      padding-bottom: 60px;
+      position: relative;
     }
-    textarea, input, button {
+    textarea, input, button, select {
       width: 100%;
       margin-top: 0.5rem;
       margin-bottom: 1rem;
@@ -27,6 +29,7 @@
       border-radius: 8px;
       border: 1px solid #ccc;
       font-size: 1rem;
+      box-sizing: border-box;
     }
     .diary-entry {
       background: #eef;
@@ -59,6 +62,28 @@
       border-radius: 10px;
       margin-top: 1rem;
     }
+    .top-right-settings {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      cursor: pointer;
+      font-size: 24px;
+      user-select: none;
+      color: #333;
+      z-index: 1100;
+      background: white;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+      transition: color 0.2s ease;
+    }
+    .top-right-settings:hover {
+      color: #007bff;
+    }
     .bottom-nav {
       position: fixed;
       bottom: 0;
@@ -72,7 +97,6 @@
       box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
       z-index: 1000;
     }
-    /* ボタン */
     .nav-button {
       background: none;
       border: none;
@@ -88,7 +112,12 @@
   </style>
 </head>
 <body>
-  <h1>アイコン＋これの名前</h1>
+  <h1 style="display: flex; align-items: center; gap: 0.5rem;">
+    <img src="./src/AppIcon.jpg" alt="アイコン" style="height: 40px; width: auto; border-radius: 10%;">
+    これの名前
+  </h1>
+
+  <div class="top-right-settings" title="設定" onclick="showPage('settingsPage')">⚙</div>
 
   <div id="diaryPage" class="page">
     <div class="container">
@@ -144,15 +173,20 @@
   </div>
 
   <nav class="bottom-nav">
-    <button class="nav-button" onclick="showPage('diaryPage')">日記投稿</button>
-    <button class="nav-button" onclick="showPage('replyPage')">リプライ</button>
-    <button class="nav-button" onclick="showPage('settingsPage')">⚙設定</button>
+    <button class="nav-button" onclick="showPage('diaryPage')">
+        <img src="./src/diary.png" alt="アイコン" style="height: 40px; width: auto; border-radius: 10%;">
+        <!-- 日記投稿 -->
+    </button>
+    <button class="nav-button" onclick="showPage('replyPage')">
+        <!-- リプライ -->
+        <img src="./src/reply.png" alt="アイコン" style="height: 40px; width: auto; border-radius: 10%;">
+    </button>
   </nav>
 
   <script>
     let wordDict = {};
-    let diaryEntries = []; // {id, text, timestamp} の配列
-    let replyEntries = {}; // { diaryId: [reply1, reply2,...] }
+    let diaryEntries = [];
+    let replyEntries = {};
     let selectedWords = [];
     let currentReplyDiaryId = null;
 
@@ -167,12 +201,8 @@
         year: "numeric", month: "2-digit", day: "2-digit",
         hour: "2-digit", minute: "2-digit", second: "2-digit"
       });
-      const id = Date.now(); // ユニークIDとしてタイムスタンプを利用
-      const entry = {
-        id: id,
-        text: diaryText,
-        timestamp: dateStr
-      };
+      const id = Date.now();
+      const entry = { id, text: diaryText, timestamp: dateStr };
 
       diaryEntries.push(entry);
       localStorage.setItem("diaryEntries", JSON.stringify(diaryEntries));
