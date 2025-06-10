@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>これの名前</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f5f5f5;
+      padding: 2rem;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    textarea, input, button {
+      width: 100%;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+      padding: 0.8rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+    .diary-entry {
+      background: #eef;
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+    }
+    .word-suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .word {
+      background: #def;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+    .word:hover {
+      background: #cde;
+    }
+    .selected-words {
+      margin-bottom: 1rem;
+    }
+    .reply {
+      background: #efe;
+      padding: 1rem;
+      border-radius: 10px;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+    <h1>アイコン＋これの名前</h1>
+  <div class="container">
+    <h2>日記を投稿</h2>
+    <textarea id="diaryInput" rows="4" placeholder="今日あったことを書いてください..."></textarea>
+    <button onclick="submitDiary()">投稿</button>
+
+    <h3>投稿された日記</h3>
+    <div id="diaryDisplay" class="diary-entry"></div>
+
+    <h3>褒めリプを作る</h3>
+    <label for="categorySelect">分類を選択: </label>
+    <select id="categorySelect" onchange="shuffleWords()">
+        <option value="すごい">すごい</option>
+        <option value="うれしい">うれしい</option>
+        <option value="ほっこり">ほっこり</option>
+        <option value="感動">感動</option>
+        <option value="面白い">面白い</option>
+        <option value="独創的">独創的</option>
+        <option value="かわいい">かわいい</option>
+        <option value="風景描写">風景描写</option>
+        <option value="共感">共感</option>
+        <option value="見た目">見た目</option>
+        <option value="流行">流行</option>
+        <option value="オノマトペ">オノマトペ</option>
+    </select>
+    <br><br>
+    <div class="word-suggestions" id="wordSuggestions"></div>
+    <button onclick="shuffleWords()">シャッフル</button>
+
+    <div class="selected-words" id="selectedWords"></div>
+    <button onclick="submitReply()">リプライ送信</button>
+
+    <div id="replyDisplay" class="reply"></div>
+  </div>
+
+  <script>
+    // const wordList = [
+    //   "笑顔が素敵", "優しい心", "努力が伝わる", "元気をもらえた", "前向きな姿勢",
+    //   "行動力がある", "感動しました", "癒されました", "思いやりがある", "すごく共感しました"
+    // ];
+    let wordDict = {};
+    let selectedWords = [];
+
+    function submitDiary() {
+      const diary = document.getElementById("diaryInput").value;
+      document.getElementById("diaryDisplay").innerText = diary;
+    }
+
+    async function loadCSV() {
+        const response = await fetch("./src/homeWord.csv");
+        const text = await response.text();
+        const lines = text.trim().split("\n");
+        lines.forEach(line => {
+        const [category, word] = line.split(",");
+        if (!wordDict[category]) wordDict[category] = [];
+        wordDict[category].push(word);
+        });
+
+        shuffleWords(); // 初期表示
+    }
+
+    // function shuffleWords() {
+    //   const shuffled = [...wordList].sort(() => 0.5 - Math.random()).slice(0, 5);
+    //   const suggestionBox = document.getElementById("wordSuggestions");
+    //   suggestionBox.innerHTML = "";
+    //   selectedWords = [];
+    //   document.getElementById("selectedWords").innerHTML = "";
+
+    //   shuffled.forEach(word => {
+    //     const wordBtn = document.createElement("div");
+    //     wordBtn.className = "word";
+    //     wordBtn.textContent = word;
+    //     wordBtn.onclick = () => {
+    //       if (!selectedWords.includes(word)) {
+    //         selectedWords.push(word);
+    //         updateSelectedWords();
+    //       }
+    //     };
+    //     suggestionBox.appendChild(wordBtn);
+    //   });
+    // }
+    function shuffleWords() {
+        const category = document.getElementById("categorySelect").value;
+        const words = wordDict[category] || [];
+        const shuffled = [...words].sort(() => 0.5 - Math.random()).slice(0, 5);
+        const suggestionBox = document.getElementById("wordSuggestions");
+        suggestionBox.innerHTML = "";
+        selectedWords = [];
+        document.getElementById("selectedWords").innerHTML = "";
+
+        shuffled.forEach(word => {
+        const wordBtn = document.createElement("div");
+        wordBtn.className = "word";
+        wordBtn.textContent = word;
+        wordBtn.onclick = () => {
+            if (!selectedWords.includes(word)) {
+            selectedWords.push(word);
+            updateSelectedWords();
+            }
+        };
+        suggestionBox.appendChild(wordBtn);
+        });
+    } 
+
+    function updateSelectedWords() {
+      const selectedBox = document.getElementById("selectedWords");
+      selectedBox.innerText = "選んだ褒め言葉: " + selectedWords.join("、");
+    }
+
+    function submitReply() {
+      if (selectedWords.length === 0) return alert("褒め言葉を選んでください");
+      const replyText = selectedWords.join("、") + "！";
+      document.getElementById("replyDisplay").innerText = replyText;
+    }
+
+    loadCSV();
+    
+  </script>
+</body>
+</html>
