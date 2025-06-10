@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>これの名前</title>
   <style>
     body {
       font-family: sans-serif;
       background: #f5f5f5;
       padding: 2rem;
+      padding-bottom: 60px; /* ナビの高さ分を余白に */
     }
     .container {
       max-width: 800px;
@@ -16,6 +17,7 @@
       padding: 2rem;
       border-radius: 12px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding-bottom: 60px; /* ナビの高さ分を余白に */
     }
     textarea, input, button {
       width: 100%;
@@ -43,6 +45,7 @@
       padding: 0.5rem 1rem;
       border-radius: 20px;
       cursor: pointer;
+      user-select: none;
     }
     .word:hover {
       background: #cde;
@@ -82,136 +85,263 @@
     .nav-button:hover {
       color: #007bff;
     }
-
-    /* コンテンツがナビの下に隠れないよう余白追加 */
-    body, .container {
-      padding-bottom: 60px; /* ナビの高さ分を余白に */
-    }
   </style>
 </head>
 <body>
-    <h1>アイコン＋これの名前</h1>
-  <div class="container">
-    <h2>日記を投稿</h2>
-    <textarea id="diaryInput" rows="4" placeholder="今日あったことを書いてください..."></textarea>
-    <button onclick="submitDiary()">投稿</button>
+  <h1>アイコン＋これの名前</h1>
 
-    <h3>投稿された日記</h3>
-    <div id="diaryDisplay" class="diary-entry"></div>
+  <div id="diaryPage" class="page">
+    <div class="container">
+      <h2>今日の日記</h2>
+      <textarea id="diaryInput" rows="4" placeholder="今日あったことを書いてください..."></textarea>
+      <button onclick="submitDiary()">投稿</button>
 
-    <h3>褒めリプを作る</h3>
-    <label for="categorySelect">分類を選択: </label>
-    <select id="categorySelect" onchange="shuffleWords()">
-        <option value="すごい">すごい</option>
-        <option value="うれしい">うれしい</option>
-        <option value="ほっこり">ほっこり</option>
-        <option value="感動">感動</option>
-        <option value="面白い">面白い</option>
-        <option value="独創的">独創的</option>
-        <option value="かわいい">かわいい</option>
-        <option value="風景描写">風景描写</option>
-        <option value="共感">共感</option>
-        <option value="見た目">見た目</option>
-        <option value="流行">流行</option>
-        <option value="オノマトペ">オノマトペ</option>
-    </select>
-    <br><br>
-    <div class="word-suggestions" id="wordSuggestions"></div>
-    <button onclick="shuffleWords()">シャッフル</button>
-
-    <div class="selected-words" id="selectedWords"></div>
-    <button onclick="submitReply()">リプライ送信</button>
-
-    <div id="replyDisplay" class="reply"></div>
+      <h3>投稿された日記</h3>
+      <div id="diaryDisplay"></div>
+    </div>
   </div>
 
+  <div id="replyPage" class="page" style="display:none;">
+    <div class="container">
+      <h2>他の人の日記</h2>
+      <div id="diaryListForReply"></div>
+
+      <div id="replyInputArea" style="display:none; margin-top: 1rem;">
+        <p><strong>リプライする日記：</strong><span id="selectedDiaryText"></span></p>
+        <label for="categorySelect">分類を選択: </label>
+        <select id="categorySelect" onchange="shuffleWords()">
+          <option value="すごい">すごい</option>
+          <option value="うれしい">うれしい</option>
+          <option value="ほっこり">ほっこり</option>
+          <option value="感動">感動</option>
+          <option value="面白い">面白い</option>
+          <option value="独創的">独創的</option>
+          <option value="かわいい">かわいい</option>
+          <option value="風景描写">風景描写</option>
+          <option value="共感">共感</option>
+          <option value="見た目">見た目</option>
+          <option value="流行">流行</option>
+          <option value="オノマトペ">オノマトペ</option>
+        </select>
+        <br /><br />
+        <div class="word-suggestions" id="wordSuggestions"></div>
+        <button onclick="shuffleWords()">シャッフル</button>
+
+        <div class="selected-words" id="selectedWords">選んだ褒め言葉: </div>
+        <button onclick="submitReply()">リプライ送信</button>
+
+        <div id="replyDisplay" class="reply"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="settingsPage" class="page" style="display:none;">
+    <div class="container">
+      <h2>設定</h2>
+      <p>保存されたデータをリセットします。</p>
+      <button onclick="clearAllData()">すべての投稿とリプライを削除</button>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <button class="nav-button" onclick="showPage('diaryPage')">日記投稿</button>
+    <button class="nav-button" onclick="showPage('replyPage')">リプライ</button>
+    <button class="nav-button" onclick="showPage('settingsPage')">⚙設定</button>
+  </nav>
+
   <script>
-    // const wordList = [
-    //   "笑顔が素敵", "優しい心", "努力が伝わる", "元気をもらえた", "前向きな姿勢",
-    //   "行動力がある", "感動しました", "癒されました", "思いやりがある", "すごく共感しました"
-    // ];
     let wordDict = {};
+    let diaryEntries = []; // {id, text, timestamp} の配列
+    let replyEntries = {}; // { diaryId: [reply1, reply2,...] }
     let selectedWords = [];
+    let currentReplyDiaryId = null;
 
     function submitDiary() {
-      const diary = document.getElementById("diaryInput").value;
-      document.getElementById("diaryDisplay").innerText = diary;
+      const diaryText = document.getElementById("diaryInput").value.trim();
+      if (diaryText === "") {
+        alert("日記が空です");
+        return;
+      }
+      const now = new Date();
+      const dateStr = now.toLocaleString("ja-JP", {
+        year: "numeric", month: "2-digit", day: "2-digit",
+        hour: "2-digit", minute: "2-digit", second: "2-digit"
+      });
+      const id = Date.now(); // ユニークIDとしてタイムスタンプを利用
+      const entry = {
+        id: id,
+        text: diaryText,
+        timestamp: dateStr
+      };
+
+      diaryEntries.push(entry);
+      localStorage.setItem("diaryEntries", JSON.stringify(diaryEntries));
+      updateDiaryDisplay();
+      updateDiaryListForReply();
+
+      document.getElementById("diaryInput").value = "";
     }
 
-    async function loadCSV() {
-        const response = await fetch("./src/homeWord.csv");
-        const text = await response.text();
-        const lines = text.trim().split("\n");
-        lines.forEach(line => {
-        const [category, word] = line.split(",");
-        if (!wordDict[category]) wordDict[category] = [];
-        wordDict[category].push(word);
-        });
-
-        shuffleWords(); // 初期表示
+    function updateDiaryDisplay() {
+      const display = document.getElementById("diaryDisplay");
+      display.innerHTML = diaryEntries.map(entry =>
+        `<div class="diary-entry">
+          <strong>${entry.timestamp}</strong><br>${entry.text}
+        </div>`
+      ).join("");
     }
 
-    // function shuffleWords() {
-    //   const shuffled = [...wordList].sort(() => 0.5 - Math.random()).slice(0, 5);
-    //   const suggestionBox = document.getElementById("wordSuggestions");
-    //   suggestionBox.innerHTML = "";
-    //   selectedWords = [];
-    //   document.getElementById("selectedWords").innerHTML = "";
+    function updateDiaryListForReply() {
+      const container = document.getElementById("diaryListForReply");
+      if (diaryEntries.length === 0) {
+        container.innerHTML = "<p>まだ日記がありません。</p>";
+        return;
+      }
+      container.innerHTML = diaryEntries.map(entry => `
+        <div class="diary-entry" style="margin-bottom:1rem;">
+          <strong>${entry.timestamp}</strong><br>${entry.text}<br>
+          <button onclick="selectDiaryForReply(${entry.id})">この日記にリプライ</button>
+          ${renderReplies(entry.id)}
+        </div>
+      `).join("");
+    }
 
-    //   shuffled.forEach(word => {
-    //     const wordBtn = document.createElement("div");
-    //     wordBtn.className = "word";
-    //     wordBtn.textContent = word;
-    //     wordBtn.onclick = () => {
-    //       if (!selectedWords.includes(word)) {
-    //         selectedWords.push(word);
-    //         updateSelectedWords();
-    //       }
-    //     };
-    //     suggestionBox.appendChild(wordBtn);
-    //   });
-    // }
+    function renderReplies(diaryId) {
+      const replies = replyEntries[diaryId] || [];
+      if (replies.length === 0) return "";
+      return `<div class="reply" style="margin-top:0.5rem;">
+        <strong>リプライ:</strong><br>
+        ${replies.map(r => `<div>${r}</div>`).join("")}
+      </div>`;
+    }
+
+    function selectDiaryForReply(diaryId) {
+      currentReplyDiaryId = diaryId;
+      selectedWords = [];
+      updateSelectedWords();
+
+      const diary = diaryEntries.find(d => d.id === diaryId);
+      document.getElementById("selectedDiaryText").innerText = diary ? diary.text : "";
+      document.getElementById("replyInputArea").style.display = "block";
+
+      shuffleWords();
+      showPage("replyPage");
+    }
+
     function shuffleWords() {
-        const category = document.getElementById("categorySelect").value;
-        const words = wordDict[category] || [];
-        const shuffled = [...words].sort(() => 0.5 - Math.random()).slice(0, 5);
-        const suggestionBox = document.getElementById("wordSuggestions");
-        suggestionBox.innerHTML = "";
-        selectedWords = [];
-        document.getElementById("selectedWords").innerHTML = "";
+      const category = document.getElementById("categorySelect").value;
+      const words = wordDict[category] || [];
+      const shuffled = [...words].sort(() => 0.5 - Math.random()).slice(0, 5);
+      const suggestionBox = document.getElementById("wordSuggestions");
+      suggestionBox.innerHTML = "";
+      selectedWords = [];
+      updateSelectedWords();
 
-        shuffled.forEach(word => {
+      shuffled.forEach(word => {
         const wordBtn = document.createElement("div");
         wordBtn.className = "word";
         wordBtn.textContent = word;
         wordBtn.onclick = () => {
-            if (!selectedWords.includes(word)) {
+          if (!selectedWords.includes(word)) {
             selectedWords.push(word);
             updateSelectedWords();
-            }
+          }
         };
         suggestionBox.appendChild(wordBtn);
-        });
-    } 
+      });
+    }
 
     function updateSelectedWords() {
-      const selectedBox = document.getElementById("selectedWords");
-      selectedBox.innerText = "選んだ褒め言葉: " + selectedWords.join("、");
+      const display = document.getElementById("selectedWords");
+      display.innerText = "選んだ褒め言葉: " + (selectedWords.length > 0 ? selectedWords.join("、") : "");
     }
 
     function submitReply() {
-      if (selectedWords.length === 0) return alert("褒め言葉を選んでください");
+      if (selectedWords.length === 0) {
+        alert("褒め言葉を選んでください");
+        return;
+      }
+      if (currentReplyDiaryId === null) {
+        alert("リプライ対象の日記が選択されていません");
+        return;
+      }
+
       const replyText = selectedWords.join("、") + "！";
-      document.getElementById("replyDisplay").innerText = replyText;
+      if (!replyEntries[currentReplyDiaryId]) {
+        replyEntries[currentReplyDiaryId] = [];
+      }
+      replyEntries[currentReplyDiaryId].push(replyText);
+      localStorage.setItem("replyEntries", JSON.stringify(replyEntries));
+
+      selectedWords = [];
+      updateSelectedWords();
+      document.getElementById("replyInputArea").style.display = "none";
+
+      updateDiaryListForReply();
+      alert("リプライを送信しました");
     }
 
-    loadCSV();
-    
-  </script>
-  <nav class="bottom-nav">
-    <button class="nav-button">日記投稿</button>
-    <button class="nav-button">リプライ</button>
-  </nav>
-</body>
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+      document.getElementById(pageId).style.display = 'block';
+    }
 
+    async function loadCSV() {
+      try {
+        const response = await fetch("./src/homeWord.csv");
+        const text = await response.text();
+        const lines = text.trim().split("\n");
+        lines.forEach(line => {
+          const [category, word] = line.split(",");
+          if (!wordDict[category]) wordDict[category] = [];
+          wordDict[category].push(word);
+        });
+        shuffleWords();
+      } catch (e) {
+        console.error("CSV読み込みエラー:", e);
+      }
+    }
+
+    function loadSavedData() {
+      const diaries = localStorage.getItem("diaryEntries");
+      const replies = localStorage.getItem("replyEntries");
+
+      if (diaries) {
+        try {
+          diaryEntries = JSON.parse(diaries);
+          updateDiaryDisplay();
+          updateDiaryListForReply();
+        } catch (e) {
+          console.error("日記の読み込み失敗:", e);
+        }
+      }
+
+      if (replies) {
+        try {
+          replyEntries = JSON.parse(replies);
+        } catch (e) {
+          console.error("リプライの読み込み失敗:", e);
+        }
+      }
+    }
+
+    function clearAllData() {
+      if (!confirm("すべての投稿とリプライを削除してもよろしいですか？")) return;
+
+      localStorage.removeItem("diaryEntries");
+      localStorage.removeItem("replyEntries");
+
+      diaryEntries = [];
+      replyEntries = {};
+
+      updateDiaryDisplay();
+      updateDiaryListForReply();
+
+      alert("データを削除しました");
+    }
+
+    loadSavedData();
+    loadCSV();
+  </script>
+</body>
 </html>
